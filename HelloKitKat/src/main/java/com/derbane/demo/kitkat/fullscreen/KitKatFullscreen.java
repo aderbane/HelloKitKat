@@ -13,7 +13,7 @@ import java.util.List;
 
 ;
 
-public class KitKatFullscreen extends Activity implements View.OnSystemUiVisibilityChangeListener {
+public class KitKatFullscreen extends Activity {
 
     private ListView _liMain;
 
@@ -46,7 +46,6 @@ public class KitKatFullscreen extends Activity implements View.OnSystemUiVisibil
 
         _liMain = (ListView) findViewById(R.id.liMainItems);
         _liMain.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, builder.getUiTitles()));
-        _liMain.setOnSystemUiVisibilityChangeListener(this);
         _liMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -56,11 +55,6 @@ public class KitKatFullscreen extends Activity implements View.OnSystemUiVisibil
         });
 
 
-    }
-
-    @Override
-    public void onSystemUiVisibilityChange(int i) {
-        Log.d("ali", "changed to: " + i);
     }
 
     private final class SystemUiVisibilityBuilder {
