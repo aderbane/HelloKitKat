@@ -1,147 +1,88 @@
 package com.derbane.demo.kitkat.fullscreen;
 
 import android.app.Activity;
-;
-import android.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.ListView;
 
-public class KitKatFullscreen extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+import java.util.ArrayList;
+import java.util.List;
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+;
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
+public class KitKatFullscreen extends Activity implements View.OnSystemUiVisibilityChangeListener {
+
+    private ListView _liMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kit_kat_fullscreen);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
-    }
-
-    @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
-    }
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }
-    }
-
-    public void restoreActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.kit_kat_fullscreen, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
+        /*
+        Initialise the UiVisibility modes
          */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+        final SystemUiVisibilityBuilder builder = new SystemUiVisibilityBuilder();
+        builder.add("Visible (API 14)", View.SYSTEM_UI_FLAG_VISIBLE);
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
+        builder.add("Fullscreen (API 16)", View.SYSTEM_UI_FLAG_FULLSCREEN);
+        builder.add("Hide navigation (API 14)", View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        builder.add("Actual fullscreen (Fullscreen + Hide navigation)", View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+        builder.add("Low profile (API 14)", View.SYSTEM_UI_FLAG_LOW_PROFILE);
+
+        builder.add("Immersive (API 19) + Fullscreen", View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        builder.add("Immersive + Hide navigation", View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        builder.add("Immersive - Actual fullscreen", View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+
+        builder.add("Immersive Sticky (API 19) + Fullscreen", View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        builder.add("Immersive Sticky + Hide navigation", View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        builder.add("Immersive Sticky - Actual fullscreen", View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
+
+        _liMain = (ListView) findViewById(R.id.liMainItems);
+        _liMain.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, builder.getUiTitles()));
+        _liMain.setOnSystemUiVisibilityChangeListener(this);
+        _liMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                _liMain.setSystemUiVisibility(builder.getVisibility(i));
+            }
+        });
+
+
+    }
+
+    @Override
+    public void onSystemUiVisibilityChange(int i) {
+        Log.d("ali", "changed to: " + i);
+    }
+
+    private final class SystemUiVisibilityBuilder {
+
+        private List<String> _uiTitles = new ArrayList<String>();
+        private List<Integer> _uiVisibilities = new ArrayList<Integer>();
+
+        public SystemUiVisibilityBuilder add(String uiTitle, int visibility) {
+            _uiTitles.add(uiTitle);
+            _uiVisibilities.add(visibility);
+            return this;
         }
 
-        public PlaceholderFragment() {
+        public List<String> getUiTitles() {
+            return _uiTitles;
         }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_kit_kat_fullscreen, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
+        public int getVisibility(int position) {
+            return _uiVisibilities.get(position);
         }
 
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((KitKatFullscreen) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
+
     }
 
 }
